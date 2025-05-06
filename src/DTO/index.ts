@@ -1,2 +1,2 @@
-export * from './PersonaDTO';
-export * from './AutoDTO';
+export * from './PersonaListingDTO';
+export * from './AutoListingDTO';

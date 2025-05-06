@@ -107,7 +107,9 @@ if (process.env.SEED_DATA === 'true') {
 export const db: {
     personas: Record<UUID, WithId<Persona>>;
     autos: Record<UUID, WithId<Auto>>;
+    all: <T>(collection: Record<UUID, WithId<T>>) => WithId<T>[];
 } = {
     personas,
-    autos
+    autos,
+    all: <T>(collection: Record<UUID, WithId<T>>): WithId<T>[] => Object.values(collection)
 };
