@@ -14,7 +14,7 @@ export type Persona = {
     genero: Genero;
     esDonanteDeOrganos: boolean;
     // Relationships
-    autos?: UUID[];
+    autos: UUID[];
 };
 
 const personaSchema = zod.object({
@@ -39,6 +39,6 @@ const personaSchema = zod.object({
 
 export const validatedPersona = (entity: Persona): Validation<Persona> => {
     const result = personaSchema.safeParse(entity);
-    if (result.success) return result;
+    if (result.success) return result as Validation<Persona>;
     return { success: false, error: InvalidData.fromZodError(result.error) };
 };
