@@ -1,3 +1,5 @@
+import { ZodError } from 'zod';
+
 class AppError extends Error {
     public constructor(message?: string) {
         super(message);
@@ -16,6 +18,14 @@ export class InvalidData extends AppError {
         message?: string
     ) {
         super(message);
+    }
+    public static fromZodError(error: ZodError) {
+        const errors = error.errors.reduce<Record<string, string>>((acc, e) => {
+            const key = e.path[0] as string;
+            acc[key] = e.message;
+            return acc;
+        }, {});
+        return new InvalidData(errors);
     }
 }
 export class NonExistingRelationshipId extends AppError {}
