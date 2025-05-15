@@ -1,8 +1,8 @@
 import { Auto, WithId, UUID } from '../../models';
-import { AbstractTransintRepository } from './AbstractTransientRepository';
+import { AbstractTransientRepository } from './AbstractTransientRepository';
 import { db } from './DB';
 
-export class AutoTransientRepository extends AbstractTransintRepository<Auto> {
+export class AutoTransientRepository extends AbstractTransientRepository<Auto> {
     protected collection = db.autos;
 
     protected beforeSave(entity: Auto, id?: UUID): Record<string, string> {

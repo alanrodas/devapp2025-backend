@@ -1,8 +1,8 @@
 import { Persona, UUID, WithId } from '../../models';
-import { AbstractTransintRepository } from './AbstractTransientRepository';
+import { AbstractTransientRepository } from './AbstractTransientRepository';
 import { db } from './DB';
 
-export class PersonaTransientRepository extends AbstractTransintRepository<Persona> {
+export class PersonaTransientRepository extends AbstractTransientRepository<Persona> {
     protected collection = db.personas;
 
     protected beforeSave(entity: Persona, id?: UUID): Record<string, string> {
@@ -23,6 +23,7 @@ export class PersonaTransientRepository extends AbstractTransintRepository<Perso
             if (!db.autos[auto]) {
                 errors.autos =
                     "Not all the given autos id's exist in the system. Only existing autos can be added to the list.";
+                break;
             }
         }
         return errors;

@@ -26,15 +26,13 @@ export abstract class RepositoryFactory {
         if (process.env.REPOSITORY === 'transient') {
             return new PersonaTransientRepository();
         }
-        // Default es transient
-        return new PersonaTransientRepository();
+        throw new Error('REPOSITORY not configured');
     }
 
     private static getAutoRepositoryByConfiguration(): IRepository<Auto> {
         if (process.env.REPOSITORY === 'transient') {
             return new AutoTransientRepository();
         }
-        // Default es transient
-        return new AutoTransientRepository();
+        throw new Error('REPOSITORY not configured');
     }
 }

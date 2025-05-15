@@ -1,63 +1,57 @@
 import { NextFunction, Request, Response } from 'express';
-import { WithId } from '../Models';
+import { UUID, WithId } from '../Models';
 import { IService } from '../Services';
+import { InputAddDTOManager, InputEditDTOManager } from './InputDTO';
+import { OutputDTOManager } from './RequestDTO/OutputDTOManager';
 
-export abstract class BREADController<TEntity> {
+type ControllerProps = {
+    req: Request;
+    res: Response;
+    next: NextFunction;
+};
+
+export abstract class BREADController<TEntity, TInputAddDTO, TInputEditDTO, TOutputFullDTO, TOutputListingDTO> {
     // Assumes a bread middleware was used
     protected abstract service: IService<TEntity>;
+    protected abstract addDtoManager: InputAddDTOManager<TInputAddDTO, TEntity>;
+    protected abstract editDtoManager: InputEditDTOManager<TInputEditDTO, TEntity>;
+    protected abstract fullDtoManager: OutputDTOManager<TOutputFullDTO, TEntity>;
+    protected abstract listingDtoManager: OutputDTOManager<TOutputListingDTO, TEntity>;
 
-    public browse(
-        req: Request<never, WithId<TEntity>[], never>,
-        res: Response<WithId<TEntity>[]>,
-        next: NextFunction
-    ): void {
-        // Primero obtenemos la totalidad de las entidades desde el service, para listado
-        const entities = this.service.all();
-        // Y ahora preparamos el response
-        res.status(200).json(entities);
-        next();
+    public validatedEditDto(dto: unknown): TInputEditDTO {
+        return this.editDtoManager.validatedDTO(dto);
     }
 
-    public read(
-        req: Request<{ id: string }, WithId<TEntity>>,
-        res: Response<WithId<TEntity>>,
-        next: NextFunction
-    ): void {
-        // locals.entity ya contiene la entidad a leer,
-        // basta decir que va a ser lo que queremos en el response
-        res.status(200).json(req.locals.entity);
-        next();
+    public validatedAddDto(dto: unknown): TInputAddDTO {
+        return this.addDtoManager.validatedDTO(dto);
     }
 
-    public edit(
-        req: Request<{ id: string }, WithId<TEntity>, Partial<TEntity>>,
-        res: Response<WithId<TEntity>>,
-        next: NextFunction
-    ): void {
-        console.log('IN EDIT');
-        console.log(req.locals.entity);
-        // En locals.entity ya está la entidad mergeada con el body
-        const newEntity = this.service.update(req.locals.entity);
-        // Y devolvemos la entidad actualizada en el response
-        res.status(200).json(newEntity);
-        next();
+    public fetchEntity(id: UUID): WithId<TEntity> {
+        return this.service.get(id);
     }
 
-    public add(
-        req: Request<never, WithId<TEntity>, TEntity>,
-        res: Response<WithId<TEntity>>,
-        next: NextFunction
-    ): void {
-        // Creamos la nueva entidad y devolvemos
-        const newEntity = this.service.create(req.locals.entity);
-        // Y devolvemos la entidad creada
-        res.status(200).json(newEntity);
-        next();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    public browse(props: ControllerProps): TOutputListingDTO[] {
+        return this.service.all().map((e) => this.listingDtoManager.toDto(e));
     }
 
-    public delete(req: Request<{ id: string }>, res: Response<never>, next: NextFunction): void {
-        this.service.delete(req.locals.entity);
-        res.status(200).json();
-        next();
+    public read({ entity }: ControllerProps & { entity: WithId<TEntity> }): TOutputFullDTO {
+        return this.fullDtoManager.toDto(entity);
+    }
+
+    public edit({ dto, entity }: ControllerProps & { dto: TInputEditDTO; entity: WithId<TEntity> }): TOutputFullDTO {
+        const dtoAsEntity: WithId<TEntity> = this.editDtoManager.toEntity(dto, entity);
+        const savedEntity = this.service.update(dtoAsEntity);
+        return this.fullDtoManager.toDto(savedEntity);
+    }
+
+    public add({ dto }: ControllerProps & { dto: TInputAddDTO }): TOutputFullDTO {
+        const dtoAsEntity: TEntity = this.addDtoManager.toEntity(dto);
+        const savedEntity = this.service.create(dtoAsEntity);
+        return this.fullDtoManager.toDto(savedEntity);
+    }
+
+    public delete({ entity }: ControllerProps & { entity: WithId<TEntity> }): void {
+        this.service.delete(entity);
     }
 }

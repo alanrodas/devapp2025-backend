@@ -1,42 +1,72 @@
-import { Router } from 'express';
+import { NextFunction, Router, Request, Response } from 'express';
 import { BREADController } from '../Controllers';
-import { BREADMiddleware } from '../Middlewares/BREADMiddleware';
 
-export const BREADRouter = <TEntity, TDto>(
-    controller: BREADController<TEntity>,
-    middleware?: BREADMiddleware<TEntity, TDto, TEntity>
+export const BREADRouter = <TEntity, TInputAddDTO, TInputEditDTO, TOutputFullDTO, TOutputListingDTO>(
+    controller: BREADController<TEntity, TInputAddDTO, TInputEditDTO, TOutputFullDTO, TOutputListingDTO>
 ) => {
     const router = Router();
 
-    if (middleware) {
-        // En las rutas donde se recibe un id, obtener la entidad a partir de la misma
-        router.get('/:id', middleware.fetchEntityByParamId.bind(middleware));
-        router.put('/:id', middleware.fetchEntityByParamId.bind(middleware));
-        router.delete('/:id', middleware.fetchEntityByParamId.bind(middleware));
-        // En el add, la entidad viene del body
-        router.post('/', middleware.fetchEntityFromBody.bind(middleware));
-        // En el editar, hay que mergear la entidad encontrada con el body
-        router.put('/:id', middleware.mergeEntityWithBody.bind(middleware));
-        // En el agregar y editar, se debe validar las entidades
-        router.put('/:id', middleware.validateEntity.bind(middleware));
-        router.post('/', middleware.validateEntity.bind(middleware));
-    }
+    const fetchEntityByParamId = (req: Request<{ id: string }>, res: Response, next: NextFunction): void => {
+        const id = req.params.id;
+        const entity = controller.fetchEntity(id);
+        req.locals.entity = entity;
+        next();
+    };
 
-    // Ahora si van las rutas reales
-    router.get('/', controller.browse.bind(controller));
-    router.get('/:id', controller.read.bind(controller));
-    router.put('/:id', controller.edit.bind(controller));
-    router.post('/', controller.add.bind(controller));
-    router.delete('/:id', controller.delete.bind(controller));
+    router.get('/:id', fetchEntityByParamId);
+    router.put('/:id', fetchEntityByParamId);
+    router.delete('/:id', fetchEntityByParamId);
 
-    if (middleware) {
-        // En las rutas donde se listas entidades, se debe transformar a su correspondiente DTO
-        router.get('/', middleware.responseToListing.bind(middleware));
-        // En las que se devuelve una sola entidad, se debe transformar a una entidad completa
-        router.get('/:id', middleware.responseToFullEntity.bind(middleware));
-        router.put('/:id', middleware.responseToFullEntity.bind(middleware));
-        router.post('/:id', middleware.responseToFullEntity.bind(middleware));
-        // Ahora el response si está listo para enviarse de forma completa
-    }
+    router.get('/', (req, res, next) => {
+        res.status(200).json(
+            controller.browse({
+                req,
+                res,
+                next
+            })
+        );
+    });
+    router.get('/:id', (req, res, next) => {
+        res.status(200).json(
+            controller.read({
+                entity: req.locals.entity,
+                req,
+                res,
+                next
+            })
+        );
+    });
+    router.put('/:id', (req, res, next) => {
+        res.status(200).json(
+            controller.edit({
+                dto: controller.validatedEditDto(req.body),
+                entity: req.locals.entity,
+                req,
+                res,
+                next
+            })
+        );
+    });
+    router.post('/', (req, res, next) => {
+        res.status(200).json(
+            controller.add({
+                dto: controller.validatedAddDto(req.body),
+                req,
+                res,
+                next
+            })
+        );
+    });
+    router.delete('/:id', (req, res, next) => {
+        res.status(200).json(
+            controller.delete({
+                entity: req.locals.entity,
+                req,
+                res,
+                next
+            })
+        );
+    });
+
     return router;
 };

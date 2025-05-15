@@ -4,7 +4,11 @@ import { Validation } from './Validations';
 import { InvalidData } from './errors';
 import zod from 'zod';
 
-type Genero = 'masculino' | 'femenino' | 'no binario';
+export enum Genero {
+    masculino = 'masculino',
+    femenino = 'femenino',
+    noBinario = 'no binario'
+}
 
 export type Persona = {
     dni: string;

@@ -5,12 +5,13 @@ import { IRepository } from '../IRepository';
 import { db } from './DB';
 import { isEmptyObject } from '../../helpers';
 
-export abstract class AbstractTransintRepository<TEntity> implements IRepository<TEntity> {
+export abstract class AbstractTransientRepository<TEntity> implements IRepository<TEntity> {
     protected abstract collection: Record<UUID, WithId<TEntity>>;
 
     public all(): WithId<TEntity>[] {
         return db.all(this.collection);
     }
+
     public get(id: UUID): WithId<TEntity> {
         return this.collection[id];
     }
@@ -21,7 +22,7 @@ export abstract class AbstractTransintRepository<TEntity> implements IRepository
             throw new InvalidData(beforeErrors);
         }
         id = id ?? crypto.randomUUID();
-        const entityWithId: WithId<TEntity> = { ...entity, _id: id };
+        const entityWithId: WithId<TEntity> = { _id: id, ...entity };
         this.collection[id] = entityWithId;
         const afterErrors = this.afterSave(entityWithId);
         if (!isEmptyObject(afterErrors)) {
@@ -29,6 +30,7 @@ export abstract class AbstractTransintRepository<TEntity> implements IRepository
         }
         return entityWithId;
     }
+
     public delete(id: UUID): boolean {
         const entity = this.collection[id];
         if (entity) {
