@@ -6,6 +6,7 @@ import { catching } from '../helpers';
 // reconozca como manejador de errores
 
 export const ErrorCatching = (err: Error, req: Request, res: Response, next: NextFunction): void => {
+    console.log('error');
     catching(err, {
         NonExistentElement: () => {
             res.status(404).json();

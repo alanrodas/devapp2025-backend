@@ -1,8 +1,8 @@
 import { UUID, WithId } from '../models';
 
 export interface IRepository<TEntity> {
-    all(): WithId<TEntity>[];
-    get(id: UUID): WithId<TEntity>;
-    save(entity: TEntity, id?: UUID): WithId<TEntity>;
-    delete(id: UUID): boolean;
+    all(): Promise<WithId<TEntity>[]>;
+    get(id: UUID): Promise<WithId<TEntity> | undefined>;
+    save(entity: TEntity, id?: UUID): Promise<WithId<TEntity>>;
+    delete(id: UUID): Promise<boolean>;
 }

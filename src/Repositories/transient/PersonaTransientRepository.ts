@@ -5,7 +5,7 @@ import { db } from './DB';
 export class PersonaTransientRepository extends AbstractTransientRepository<Persona> {
     protected collection = db.personas;
 
-    protected beforeSave(entity: Persona, id?: UUID): Record<string, string> {
+    protected async beforeSave(entity: Persona, id?: UUID): Promise<Record<string, string>> {
         // Por defecto una persona comienza sin autos
         if (!id) {
             entity.autos = [];
@@ -29,7 +29,7 @@ export class PersonaTransientRepository extends AbstractTransientRepository<Pers
         return errors;
     }
 
-    protected beforeDelete(entity: WithId<Persona>): Record<string, string> {
+    protected async beforeDelete(entity: WithId<Persona>): Promise<Record<string, string>> {
         // Borramos todos los autos asociados a la persona
         for (const auto of entity.autos) {
             delete db.autos[auto];

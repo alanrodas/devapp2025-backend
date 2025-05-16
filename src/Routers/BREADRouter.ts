@@ -6,9 +6,13 @@ export const BREADRouter = <TEntity, TInputAddDTO, TInputEditDTO, TOutputFullDTO
 ) => {
     const router = Router();
 
-    const fetchEntityByParamId = (req: Request<{ id: string }>, res: Response, next: NextFunction): void => {
+    const fetchEntityByParamId = async (
+        req: Request<{ id: string }>,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
         const id = req.params.id;
-        const entity = controller.fetchEntity(id);
+        const entity = await controller.fetchEntity(id);
         req.locals.entity = entity;
         next();
     };
@@ -17,18 +21,18 @@ export const BREADRouter = <TEntity, TInputAddDTO, TInputEditDTO, TOutputFullDTO
     router.put('/:id', fetchEntityByParamId);
     router.delete('/:id', fetchEntityByParamId);
 
-    router.get('/', (req, res, next) => {
+    router.get('/', async (req, res, next) => {
         res.status(200).json(
-            controller.browse({
+            await controller.browse({
                 req,
                 res,
                 next
             })
         );
     });
-    router.get('/:id', (req, res, next) => {
+    router.get('/:id', async (req, res, next) => {
         res.status(200).json(
-            controller.read({
+            await controller.read({
                 entity: req.locals.entity,
                 req,
                 res,
@@ -36,9 +40,9 @@ export const BREADRouter = <TEntity, TInputAddDTO, TInputEditDTO, TOutputFullDTO
             })
         );
     });
-    router.put('/:id', (req, res, next) => {
+    router.put('/:id', async (req, res, next) => {
         res.status(200).json(
-            controller.edit({
+            await controller.edit({
                 dto: controller.validatedEditDto(req.body),
                 entity: req.locals.entity,
                 req,
@@ -47,9 +51,9 @@ export const BREADRouter = <TEntity, TInputAddDTO, TInputEditDTO, TOutputFullDTO
             })
         );
     });
-    router.post('/', (req, res, next) => {
+    router.post('/', async (req, res, next) => {
         res.status(200).json(
-            controller.add({
+            await controller.add({
                 dto: controller.validatedAddDto(req.body),
                 req,
                 res,
@@ -57,9 +61,9 @@ export const BREADRouter = <TEntity, TInputAddDTO, TInputEditDTO, TOutputFullDTO
             })
         );
     });
-    router.delete('/:id', (req, res, next) => {
+    router.delete('/:id', async (req, res, next) => {
         res.status(200).json(
-            controller.delete({
+            await controller.delete({
                 entity: req.locals.entity,
                 req,
                 res,

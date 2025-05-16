@@ -5,32 +5,32 @@ import { IService } from './IService';
 export abstract class AbstractService<TEntity, TRepository extends IRepository<TEntity>> implements IService<TEntity> {
     protected abstract repository: TRepository;
 
-    public all(): WithId<TEntity>[] {
+    public async all(): Promise<WithId<TEntity>[]> {
         // Pedir al repositorio todos los datos
         return this.repository.all();
     }
 
-    public get(id: UUID): WithId<TEntity> {
+    public async get(id: UUID): Promise<WithId<TEntity>> {
         // Obtener la entidad actualmente en la base
-        const actualEntity = this.repository.get(id);
+        const actualEntity = await this.repository.get(id);
         // Si no está la entidad, lanza un error
         if (!actualEntity) throw new NonExistentElement();
         // Devolver la entidad
         return actualEntity;
     }
 
-    public create(newEntity: TEntity): WithId<TEntity> {
+    public async create(newEntity: TEntity): Promise<WithId<TEntity>> {
         // Guardamos la entidad
-        return this.repository.save(newEntity);
+        return await this.repository.save(newEntity);
     }
 
-    public update(entity: WithId<TEntity>): WithId<TEntity> {
+    public async update(entity: WithId<TEntity>): Promise<WithId<TEntity>> {
         // Guardamos la entidad y devolvemos el resultado
-        return this.repository.save(entity, entity._id);
+        return await this.repository.save(entity, entity._id);
     }
 
-    public delete(entity: WithId<TEntity>): void {
+    public async delete(entity: WithId<TEntity>): Promise<void> {
         // Borramos la entidad
-        this.repository.delete(entity._id);
+        await this.repository.delete(entity._id);
     }
 }

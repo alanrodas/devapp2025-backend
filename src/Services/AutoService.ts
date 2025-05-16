@@ -5,9 +5,9 @@ import { AbstractService } from './AbstractService';
 export class AutoService extends AbstractService<Auto, IRepository<Auto>> {
     protected repository = RepositoryFactory.autoRepository();
 
-    public allOfOwner(id: UUID): WithId<Auto>[] {
+    public async allOfOwner(id: UUID): Promise<WithId<Auto>[]> {
         // Pedir al repositorio todos los datos
-        const entities = this.repository.all();
+        const entities = await this.repository.all();
         // Filtrar por aquellos cuyo owner coincida con el dado
         return entities.filter((e) => e.owner === id);
     }

@@ -1,4 +1,4 @@
-import { UUID, WithId, Persona, Auto } from '../../models';
+import { UUID, WithId, Persona, Auto, Genero } from '../../models';
 import { Temporal } from 'temporal-polyfill';
 import process from 'process';
 
@@ -12,7 +12,7 @@ if (process.env.SEED_DATA === 'true') {
         nombre: 'Juan',
         apellido: 'Pérez',
         fechaDeNacimiento: new Temporal.PlainDate(1980, 4, 21),
-        genero: 'masculino',
+        genero: Genero.masculino,
         esDonanteDeOrganos: true,
         // Relationships
         autos: ['1', '2']
@@ -23,7 +23,7 @@ if (process.env.SEED_DATA === 'true') {
         nombre: 'María',
         apellido: 'Martinez',
         fechaDeNacimiento: new Temporal.PlainDate(1982, 7, 13),
-        genero: 'femenino',
+        genero: Genero.femenino,
         esDonanteDeOrganos: true,
         // Relationships
         autos: ['3']
@@ -34,7 +34,7 @@ if (process.env.SEED_DATA === 'true') {
         nombre: 'Sasha',
         apellido: 'Rusiska',
         fechaDeNacimiento: new Temporal.PlainDate(1995, 3, 1),
-        genero: 'no binario',
+        genero: Genero.noBinario,
         esDonanteDeOrganos: false,
         // Relationships
         autos: ['4', '5']

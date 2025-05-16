@@ -2,7 +2,7 @@ import { Auto, WithId } from '../../Models';
 
 export type AutoListingDTO = Pick<Auto, 'patente' | 'marca' | 'modelo' | 'anho'>;
 
-export const AutoLitingDTOManager = {
+export const AutoListingDTOManager = {
     toDto: (entity: WithId<Auto>): WithId<AutoListingDTO> => {
         return {
             _id: entity._id,

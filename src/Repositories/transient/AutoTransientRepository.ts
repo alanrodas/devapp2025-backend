@@ -5,7 +5,7 @@ import { db } from './DB';
 export class AutoTransientRepository extends AbstractTransientRepository<Auto> {
     protected collection = db.autos;
 
-    protected beforeSave(entity: Auto, id?: UUID): Record<string, string> {
+    protected async beforeSave(entity: Auto, id?: UUID): Promise<Record<string, string>> {
         // Validamos que exista un dueño con el ID dado
         const errors: Record<string, string> = {};
         const withSamePatente = db.all(db.autos).filter((e) => e.patente === entity.patente);
@@ -19,13 +19,13 @@ export class AutoTransientRepository extends AbstractTransientRepository<Auto> {
         return errors;
     }
 
-    protected afterSave(entity: WithId<Auto>): Record<string, string> {
+    protected async afterSave(entity: WithId<Auto>): Promise<Record<string, string>> {
         // Guardamos el auto en dentro del dueño
         db.personas[entity.owner].autos.push(entity._id);
         return {};
     }
 
-    protected afterDelete(entity: WithId<Auto>): Record<string, string> {
+    protected async afterDelete(entity: WithId<Auto>): Promise<Record<string, string>> {
         // Borrar el auto del dueño
         const owner = db.personas[entity.owner];
         const idx = owner.autos.indexOf(entity._id);

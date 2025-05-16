@@ -8,38 +8,38 @@ import { isEmptyObject } from '../../helpers';
 export abstract class AbstractTransientRepository<TEntity> implements IRepository<TEntity> {
     protected abstract collection: Record<UUID, WithId<TEntity>>;
 
-    public all(): WithId<TEntity>[] {
+    public async all(): Promise<WithId<TEntity>[]> {
         return db.all(this.collection);
     }
 
-    public get(id: UUID): WithId<TEntity> {
+    public async get(id: UUID): Promise<WithId<TEntity> | undefined> {
         return this.collection[id];
     }
 
-    public save(entity: TEntity, id?: UUID): WithId<TEntity> {
-        const beforeErrors = this.beforeSave(entity, id);
+    public async save(entity: TEntity, id?: UUID): Promise<WithId<TEntity>> {
+        const beforeErrors = await this.beforeSave(entity, id);
         if (!isEmptyObject(beforeErrors)) {
             throw new InvalidData(beforeErrors);
         }
         id = id ?? crypto.randomUUID();
         const entityWithId: WithId<TEntity> = { _id: id, ...entity };
         this.collection[id] = entityWithId;
-        const afterErrors = this.afterSave(entityWithId);
+        const afterErrors = await this.afterSave(entityWithId);
         if (!isEmptyObject(afterErrors)) {
             throw new InvalidData(afterErrors);
         }
         return entityWithId;
     }
 
-    public delete(id: UUID): boolean {
+    public async delete(id: UUID): Promise<boolean> {
         const entity = this.collection[id];
         if (entity) {
-            const beforeErrors = this.beforeDelete(entity, id);
+            const beforeErrors = await this.beforeDelete(entity, id);
             if (!isEmptyObject(beforeErrors)) {
                 throw new InvalidData(beforeErrors);
             }
             delete this.collection[id];
-            const afterErrors = this.afterDelete(entity);
+            const afterErrors = await this.afterDelete(entity);
             if (!isEmptyObject(afterErrors)) {
                 throw new InvalidData(afterErrors);
             }
@@ -49,19 +49,19 @@ export abstract class AbstractTransientRepository<TEntity> implements IRepositor
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected beforeSave(entity: TEntity, id?: UUID): Record<string, string> {
+    protected async beforeSave(entity: TEntity, id?: UUID): Promise<Record<string, string>> {
         return {};
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected afterSave(entity: WithId<TEntity>): Record<string, string> {
+    protected async afterSave(entity: WithId<TEntity>): Promise<Record<string, string>> {
         return {};
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected beforeDelete(entity: WithId<TEntity>, _id?: UUID): Record<string, string> {
+    protected async beforeDelete(entity: WithId<TEntity>, _id?: UUID): Promise<Record<string, string>> {
         return {};
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    protected afterDelete(entity: WithId<TEntity>): Record<string, string> {
+    protected async afterDelete(entity: WithId<TEntity>): Promise<Record<string, string>> {
         return {};
     }
 }

@@ -6,6 +6,8 @@ import process from 'process';
 import { RequestWithLocals, ErrorCatching } from './Middlewares';
 import { AutoRouter, PersonaRouter } from './Routers';
 
+import 'express-async-errors';
+
 // Creamos nuestra app express
 const app = express();
 // Leemos el puerto de las variables de entorno, si no está, usamos uno por default

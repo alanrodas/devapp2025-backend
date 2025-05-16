@@ -1,6 +1,5 @@
 import { IService } from './IService';
 import { Auto, Persona } from '../Models';
-import { AutoListingDTO, PersonaListingDTO } from '../DTO';
 import { AutoService } from './AutoService';
 import { PersonaService } from './PersonaService';
 
