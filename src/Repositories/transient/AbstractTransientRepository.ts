@@ -6,14 +6,14 @@ import { db } from './DB';
 import { isEmptyObject } from '../../helpers';
 
 export abstract class AbstractTransientRepository<TEntity> implements IRepository<TEntity> {
-    protected abstract collection: Record<UUID, WithId<TEntity>>;
+    protected abstract collection: Record<string, WithId<TEntity>>;
 
     public async all(): Promise<WithId<TEntity>[]> {
         return db.all(this.collection);
     }
 
     public async get(id: UUID): Promise<WithId<TEntity> | undefined> {
-        return this.collection[id];
+        return this.collection[id as string];
     }
 
     public async save(entity: TEntity, id?: UUID): Promise<WithId<TEntity>> {
@@ -23,7 +23,7 @@ export abstract class AbstractTransientRepository<TEntity> implements IRepositor
         }
         id = id ?? crypto.randomUUID();
         const entityWithId: WithId<TEntity> = { _id: id, ...entity };
-        this.collection[id] = entityWithId;
+        this.collection[id as string] = entityWithId;
         const afterErrors = await this.afterSave(entityWithId);
         if (!isEmptyObject(afterErrors)) {
             throw new InvalidData(afterErrors);
@@ -32,13 +32,13 @@ export abstract class AbstractTransientRepository<TEntity> implements IRepositor
     }
 
     public async delete(id: UUID): Promise<boolean> {
-        const entity = this.collection[id];
+        const entity = this.collection[id as string];
         if (entity) {
             const beforeErrors = await this.beforeDelete(entity, id);
             if (!isEmptyObject(beforeErrors)) {
                 throw new InvalidData(beforeErrors);
             }
-            delete this.collection[id];
+            delete this.collection[id as string];
             const afterErrors = await this.afterDelete(entity);
             if (!isEmptyObject(afterErrors)) {
                 throw new InvalidData(afterErrors);

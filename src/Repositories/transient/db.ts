@@ -5,7 +5,7 @@ import process from 'process';
 const personas: Record<UUID, WithId<Persona>> = {};
 const autos: Record<UUID, WithId<Auto>> = {};
 
-if (process.env.SEED_DATA === 'true') {
+if (process.env.SEED_INITIAL_DATA === 'true') {
     personas['1'] = {
         _id: '1',
         dni: '123456789',

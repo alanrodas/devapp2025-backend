@@ -12,7 +12,7 @@ export class AutoTransientRepository extends AbstractTransientRepository<Auto> {
         if ((!id && withSamePatente.length !== 0) || (id && withSamePatente.length !== 1)) {
             errors.dni = 'The patente must be unique. Another auto with the same patente already exists.';
         }
-        const owner = db.personas[entity.owner];
+        const owner = db.personas[entity.owner as string];
         if (!owner) {
             errors.owner = 'The owner does not exist';
         }
@@ -21,13 +21,13 @@ export class AutoTransientRepository extends AbstractTransientRepository<Auto> {
 
     protected async afterSave(entity: WithId<Auto>): Promise<Record<string, string>> {
         // Guardamos el auto en dentro del dueño
-        db.personas[entity.owner].autos.push(entity._id);
+        db.personas[entity.owner as string].autos.push(entity._id);
         return {};
     }
 
     protected async afterDelete(entity: WithId<Auto>): Promise<Record<string, string>> {
         // Borrar el auto del dueño
-        const owner = db.personas[entity.owner];
+        const owner = db.personas[entity.owner as string];
         const idx = owner.autos.indexOf(entity._id);
         owner.autos.splice(idx, 1);
         return {};
